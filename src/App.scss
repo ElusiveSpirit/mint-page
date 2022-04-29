@@ -1,0 +1,185 @@
+/* Customize your main colors in :root variables */
+:root {
+  --main-background-color: #212121;
+  --card-background-color: #212121;
+  --card-background-lighter-color: #7A7F92;
+  --main-text-color:#F7F6F4;
+  --title-text-color:#3CBA8B;
+}
+
+$gold: #9d8f5f;
+$text-color: #dcdcdc;
+
+html {
+  box-sizing: border-box;
+  overflow-x: hidden;
+  overflow-y: scroll;
+}
+
+body{
+  background-color: #212121;
+  /*background: url("img/background.png");
+  background-size: 100%;
+  background-repeat: no-repeat;*/
+
+  font-family: "Montserrat";
+  font-size: 20px;
+  color: $text-color;
+}
+
+h2, p{
+  color: var(--main-text-color);
+  text-align: center;
+  font-size: 20px;
+  opacity:85%
+}
+
+h3{
+font-weight: normal;
+text-align: center;
+}
+
+a{
+	color: white;
+	font-weight:700;
+}
+
+
+
+.navbar {
+  display: flex;
+  justify-content: space-between;
+
+  &__title {
+    color: #fff;
+    font-weight: 700;
+    font-family: "Arial Black";
+  }
+  &__status {}
+}
+
+.main {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 6rem;
+  padding-top: 1rem;
+
+  &__container {
+    margin: 20px 4%;
+  }
+
+  &:before {
+    content: "MINT";
+    position: absolute;
+    z-index: -1;
+    color: #303030;
+    top: 30px;
+    max-width: 100%;
+    overflow: hidden;
+
+    font-weight: bold;
+    font-size: 24em;
+
+    @media only screen and (max-width: 1200px) {
+    }
+  }
+
+  &__title  {
+    margin-bottom: 1rem;
+
+    color: $gold;
+    font-weight: bold;
+    font-size: 2em;
+  }
+
+  &__description {
+    margin-bottom: 2.5rem;
+
+    font-weight: bold;
+    font-size: 0.8em;
+    line-height: 1.6em;
+    text-align: center;
+  }
+
+  &__button {
+    width: 13rem;
+    border: 1px solid $gold;
+    padding: 10px;
+    font-weight: bold;
+    text-align: center;
+
+    &__container {
+      display: flex;
+      gap: 40px;
+      margin-bottom: 2.5rem;
+
+      @media only screen and (max-width: 767px) {
+        flex-direction: column;
+      }
+    }
+
+    &__title {
+      font-size: 1em;
+    }
+
+    &__subtitle {
+      font-size: 1.2em;
+      color: $gold;
+    }
+  }
+}
+
+.faq {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 6rem;
+  padding-top: 1rem;
+
+  &__title  {
+    margin-bottom: 2rem;
+
+    color: $gold;
+    font-weight: bold;
+    font-size: 2em;
+  }
+
+  &__block {
+    position: relative;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1.5rem;
+    text-align: center;
+
+    &:after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: calc(50% - 50px);
+      width: 100px;
+      border: 1px solid $gold;
+    }
+
+    &:last-child {
+
+      &:after {
+        display: none;
+      }
+    }
+  }
+
+  &__subtitle {
+    margin-bottom: 1.5rem;
+    font-size: 1em;
+    font-weight: bolder;
+    color: $gold;
+  }
+
+  &__description {
+    font-weight: bold;
+    font-size: 0.8em;
+    line-height: 1.6em;
+    text-align: center;
+  }
+}
+

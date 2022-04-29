@@ -23,7 +23,7 @@ import {
     WalletModalProvider
 } from '@solana/wallet-adapter-react-ui';
 
-import "./App.css";
+import "./App.scss";
 import Home from "./Home";
 
 require('@solana/wallet-adapter-react-ui/styles.css');
