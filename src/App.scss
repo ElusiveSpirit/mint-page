@@ -49,6 +49,7 @@ a{
 .navbar {
   display: flex;
   justify-content: space-between;
+  flex-wrap: wrap;
 
   &__title {
     color: #fff;
@@ -183,3 +184,6 @@ a{
   }
 }
 
+.mint {
+  text-align: center;
+}

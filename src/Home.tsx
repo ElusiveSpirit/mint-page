@@ -18,6 +18,25 @@ import {
   mintOneToken,
   CANDY_MACHINE_PROGRAM,
 } from "./candy-machine";
+import moment from "moment";
+
+const candyMachineId1 = process.env.REACT_APP_CANDY_MACHINE_ID_1!.toString();
+const candyMachineId1Start = moment(process.env.REACT_APP_CANDY_MACHINE_ID_1_START!.toString())
+const candyMachineId2 = process.env.REACT_APP_CANDY_MACHINE_ID_2!.toString();
+const candyMachineId2Start = moment(process.env.REACT_APP_CANDY_MACHINE_ID_2_START!.toString())
+const candyMachineIdPublic = process.env.REACT_APP_CANDY_MACHINE_ID_PUBLIC!.toString();
+const candyMachineIdPublicStart = moment(process.env.REACT_APP_CANDY_MACHINE_ID_PUBLIC_START!.toString())
+
+let candyMachineId: string = ''
+if (moment() > candyMachineIdPublicStart) {
+  candyMachineId = candyMachineIdPublic
+} else if (moment() > candyMachineId2Start) {
+  candyMachineId = candyMachineId2
+} else if (moment() > candyMachineId1Start) {
+  candyMachineId = candyMachineId1
+} else {
+  candyMachineId = candyMachineIdPublic
+}
 
 const cluster = process.env.REACT_APP_SOLANA_NETWORK!.toString();
 const decimals = process.env.REACT_APP_SPL_TOKEN_TO_MINT_DECIMALS ? +process.env.REACT_APP_SPL_TOKEN_TO_MINT_DECIMALS!.toString() : 9;
@@ -32,13 +51,6 @@ const Card = styled(Paper)`
   h1{
     margin:0px;
   }
-`;
-
-const WalletContainer = styled.div`
-  display: flex;
-  flex-direction: row;
-  flex-wrap: wrap;
-  justify-content: center;
 `;
 
 const WalletAmount = styled.div`
@@ -134,8 +146,32 @@ const SolExplorerLink = styled.a`
   }
 `;
 
+// @ts-ignore
+let refreshCandyMachineStateFunc = null
+console.log(candyMachineId)
+setTimeout(function checkTime()  {
+  const now = moment()
+  const prevId = candyMachineId
+  if (now > candyMachineIdPublicStart) {
+    candyMachineId = candyMachineIdPublic
+  } else if (now > candyMachineId2Start) {
+    candyMachineId = candyMachineId2
+  } else if (now > candyMachineId1Start) {
+    candyMachineId = candyMachineId1
+  } else {
+    candyMachineId = candyMachineIdPublic
+  }
+  if (prevId !== candyMachineId) {
+    console.log(`New id: ${candyMachineId}`)
+    // @ts-ignore
+    // refreshCandyMachineStateFunc()
+    // eslint-disable-next-line no-restricted-globals
+    location.reload()
+  }
+  setTimeout(checkTime, 1000)
+}, 500)
+
 export interface HomeProps {
-  candyMachineId: anchor.web3.PublicKey;
   connection: anchor.web3.Connection;
   txTimeout: number;
   rpcHost: string;
@@ -175,11 +211,11 @@ const Home = (props: HomeProps) => {
 
   const refreshCandyMachineState = () => {
     (async () => {
-      if (!wallet) return;
+      if (!wallet || !candyMachineId) return;
 
       const cndy = await getCandyMachineState(
           wallet as anchor.Wallet,
-          props.candyMachineId,
+          new anchor.web3.PublicKey(candyMachineId),
           props.connection
       );
 
@@ -279,6 +315,7 @@ const Home = (props: HomeProps) => {
       }
     })();
   };
+  refreshCandyMachineStateFunc = refreshCandyMachineState;
 
   const renderGoLiveDateCounter = ({days, hours, minutes, seconds}: any) => {
     return (
@@ -409,7 +446,6 @@ const Home = (props: HomeProps) => {
 
   useEffect(refreshCandyMachineState, [
     wallet,
-    props.candyMachineId,
     props.connection,
     isEnded,
     isPresale
@@ -449,6 +485,7 @@ const Home = (props: HomeProps) => {
             Holding a AQUAHEAD at SOLD OUT moment? Receive an additional one per AQUAHEAD in your wallet.
           </div>
         </div>
+        {candyMachineId &&
         <div className="mint">
           {wallet && isActive && whitelistEnabled && (whitelistTokenBalance > 0) && isBurnToken &&
           <h3>You own {whitelistTokenBalance} WL mint {whitelistTokenBalance > 1 ? "tokens" : "token"}.</h3>}
@@ -464,11 +501,6 @@ const Home = (props: HomeProps) => {
             }}
             renderer={renderEndDateCounter}
           />}
-          {wallet && isActive &&
-          <h3>TOTAL MINTED : {itemsRedeemed} / {itemsAvailable}</h3>}
-          {wallet && isActive && <BorderLinearProgress variant="determinate"
-                                                       value={100 - (itemsRemaining * 100 / itemsAvailable)}/>}
-          <br/>
           <MintButtonContainer>
             {!isActive && !isEnded && candyMachine?.state.goLiveDate && (!isWLOnly || whitelistTokenBalance > 0) ? (
                 <Countdown
@@ -527,7 +559,7 @@ const Home = (props: HomeProps) => {
           <br/>
           {wallet && isActive && solanaExplorerLink &&
           <SolExplorerLink href={solanaExplorerLink} target="_blank">View on Solscan</SolExplorerLink>}
-        </div>
+        </div>}
         <div className="faq">
           <div className="faq__title">HOW TO MINT</div>
           <div className="faq__block">
