@@ -3,13 +3,13 @@
   "name": "Mint Page",
   "icons": [
     {
-      "src": "logo.png",
-      "type": "image/png",
-      "sizes": "358x358"
+      "src": "logo-cropped.jpg",
+      "type": "image/jpeg",
+      "sizes": "256x256"
     }
   ],
   "start_url": ".",
   "display": "standalone",
   "theme_color": "#000000",
-  "background_color": "#ffffff"
+  "background_color": "#212121"
 }

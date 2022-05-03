@@ -7,7 +7,7 @@ import {useAnchorWallet} from "@solana/wallet-adapter-react";
 import {WalletMultiButton} from "@solana/wallet-adapter-react-ui";
 import {GatewayProvider} from '@civic/solana-gateway-react';
 import Countdown from "react-countdown";
-import {Snackbar, Paper, LinearProgress, Chip} from "@material-ui/core";
+import {Snackbar, Paper, CircularProgress} from "@material-ui/core";
 import Alert from "@material-ui/lab/Alert";
 import {toDate, AlertState, getAtaForMint} from './utils';
 import {MintButton} from './MintButton';
@@ -20,14 +20,14 @@ import {
 } from "./candy-machine";
 import moment from "moment";
 
-const candyMachineId1 = process.env.REACT_APP_CANDY_MACHINE_ID_1!.toString();
+const candyMachineId1 = process.env.REACT_APP_CANDY_MACHINE_ID_1!.toString().split(',').filter(Boolean);
 const candyMachineId1Start = moment(process.env.REACT_APP_CANDY_MACHINE_ID_1_START!.toString())
-const candyMachineId2 = process.env.REACT_APP_CANDY_MACHINE_ID_2!.toString();
+const candyMachineId2 = process.env.REACT_APP_CANDY_MACHINE_ID_2!.toString().split(',').filter(Boolean);
 const candyMachineId2Start = moment(process.env.REACT_APP_CANDY_MACHINE_ID_2_START!.toString())
-const candyMachineIdPublic = process.env.REACT_APP_CANDY_MACHINE_ID_PUBLIC!.toString();
+const candyMachineIdPublic = process.env.REACT_APP_CANDY_MACHINE_ID_PUBLIC!.toString().split(',').filter(Boolean);
 const candyMachineIdPublicStart = moment(process.env.REACT_APP_CANDY_MACHINE_ID_PUBLIC_START!.toString())
 
-let candyMachineId: string = ''
+let candyMachineId: Array<string> = []
 if (moment() > candyMachineIdPublicStart) {
   candyMachineId = candyMachineIdPublic
 } else if (moment() > candyMachineId2Start) {
@@ -113,21 +113,9 @@ const ConnectButton = styled(WalletMultiButton)`
   background-color: #9c8f5f;
   margin: 0 auto;
 `;
-const BorderLinearProgress = styled(LinearProgress)`
-  margin: 20px;
-  height: 10px !important;
-  border-radius: 30px;
-  border: 2px solid white;
-  box-shadow: 5px 5px 40px 5px rgba(0,0,0,0.5);
-  background-color:var(--main-text-color) !important;
-  
-  > div.MuiLinearProgress-barColorPrimary{
-    background-color:var(--title-text-color) !important;
-  }
-
-  > div.MuiLinearProgress-bar1Determinate {
-    border-radius: 30px !important;
-    background-image: linear-gradient(270deg, rgba(255, 255, 255, 0.01), rgba(255, 255, 255, 0.5));
+const SolCircularProgress = styled(CircularProgress)`
+  .MuiCircularProgress-svg {
+    color: #9c8f5f;
   }
 `;
 const SolExplorerLink = styled.a`
@@ -197,6 +185,7 @@ const Home = (props: HomeProps) => {
   const [endDate, setEndDate] = useState<Date>();
   const [isPresale, setIsPresale] = useState(false);
   const [isWLOnly, setIsWLOnly] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   const [alertState, setAlertState] = useState<AlertState>({
     open: false,
@@ -211,11 +200,17 @@ const Home = (props: HomeProps) => {
 
   const refreshCandyMachineState = () => {
     (async () => {
-      if (!wallet || !candyMachineId) return;
+      if (!wallet || candyMachineId.length === 0) {
+        setIsLoading(false)
+        // setEndDate(candyMachineIdPublicStart.toDate())
+        return
+      };
+      const cmId = candyMachineId[0]
+      console.log(`Connect with: ${cmId}`)
 
       const cndy = await getCandyMachineState(
           wallet as anchor.Wallet,
-          new anchor.web3.PublicKey(candyMachineId),
+          new anchor.web3.PublicKey(cmId),
           props.connection
       );
 
@@ -223,6 +218,7 @@ const Home = (props: HomeProps) => {
       setItemsAvailable(cndy.state.itemsAvailable);
       setItemsRemaining(cndy.state.itemsRemaining);
       setItemsRedeemed(cndy.state.itemsRedeemed);
+      console.log(cndy.state)
 
       var divider = 1;
       if (decimals) {
@@ -313,6 +309,11 @@ const Home = (props: HomeProps) => {
       if (cndy.state.isSoldOut) {
         setIsActive(false);
       }
+      if (cndy.state.isSoldOut && candyMachineId.length > 0) {
+        candyMachineId.shift()
+        return refreshCandyMachineState()
+      }
+      setIsLoading(false)
     })();
   };
   refreshCandyMachineStateFunc = refreshCandyMachineState;
@@ -476,7 +477,7 @@ const Home = (props: HomeProps) => {
             </div>
             <div className="main__button">
               <div className="main__button__title">MINT PRICE</div>
-              <div className="main__button__subtitle">2 SOL (200$)</div>
+              <div className="main__button__subtitle">2.0 SOL</div>
             </div>
           </div>
           <div className="main__description">
@@ -485,7 +486,19 @@ const Home = (props: HomeProps) => {
             Holding a AQUAHEAD at SOLD OUT moment? Receive an additional one per AQUAHEAD in your wallet.
           </div>
         </div>
-        {candyMachineId &&
+        {(isLoading && wallet) &&
+        <div className="mint">
+          <SolCircularProgress />
+        </div>}
+        {!candyMachineId.length && !isLoading && endDate && Date.now() < endDate.getTime() &&
+         <div className="mint">
+            <Countdown
+              date={endDate.getTime()}
+              renderer={renderGoLiveDateCounter}
+            />
+         </div>
+            }
+        {(!!candyMachineId.length && (!isLoading || !wallet)) &&
         <div className="mint">
           {wallet && isActive && whitelistEnabled && (whitelistTokenBalance > 0) && isBurnToken &&
           <h3>You own {whitelistTokenBalance} WL mint {whitelistTokenBalance > 1 ? "tokens" : "token"}.</h3>}

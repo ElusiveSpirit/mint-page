@@ -1,19 +1,11 @@
 # Introduction
 
-### SOON : Setup Multi-Mint using this repository, explained in video by 'Stractors' https://www.youtube.com/channel/UCf-oH3TIq8xHVtVogrpTm7g
+## Deploy
 
-**Prod-ready Responsive UI** which can be easily customized in 5mn.
-
-All Candy Machine V2 functionalities are implemented, auto detected and maintained up-to-date :
-
-- public mint (with countdown when date in future)
-- civic support (gatekeeper)
-- whitelist
-- presale true / false
-- end date / end number (endSettings)
-- spl-token to mint
-
-![Candy Machine Preview Image](https://i.ibb.co/h7L0M3G/repo-bg.png)
+```bash
+PUBLIC_URL=/mint/ yarn build 
+mv build mint && scp -r ./mint user@ip_address:www/aquaheads.com
+```
 
 ### Supported Wallets
 
